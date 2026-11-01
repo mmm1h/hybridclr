@@ -29,6 +29,10 @@
 #include "vm/Type.h"
 #include "vm/Runtime.h"
 #include "vm/Exception.h"
+#include "vm/Field.h"
+#include "vm/Reflection.h"
+#include "vm/String.h"
+#include "utils/StringUtils.h"
 #include "vm/GlobalMetadataFileInternals.h"
 #include "vm/MetadataAlloc.h"
 #include "icalls/mscorlib/System/Type.h"
@@ -188,7 +192,17 @@ namespace hybridclr
 
 inline Il2CppReflectionType* GetReflectionTypeFromName(Il2CppString* name)
 {
+#if HYBRIDCLR_UNITY_VERSION >= 70000000 && MONO_NET_BCL
+    std::string text = il2cpp::utils::StringUtils::Utf16ToUtf8(il2cpp::utils::StringUtils::GetChars(name));
+    il2cpp::vm::TypeNameParseInfo info;
+    il2cpp::vm::TypeNameParser parser(text, info, false);
+    if (!parser.Parse())
+        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetArgumentException("typeName", "Invalid type name"));
+    const Il2CppType* type = il2cpp::vm::Class::il2cpp_type_from_type_info(info, il2cpp::vm::kTypeSearchFlagThrowOnError, nullptr);
+    return type ? il2cpp::vm::Reflection::GetTypeObject(type) : nullptr;
+#else
     return il2cpp::icalls::mscorlib::System::RuntimeTypeHandle::internal_from_name(name, nullptr, nullptr, true, false, false);
+#endif
 }
 
 inline void ConstructDelegate(Il2CppDelegate* delegate, Il2CppObject* target, const MethodInfo* method)
@@ -225,8 +239,12 @@ inline uint8_t* GetNulllableHasValueOffset(void* nullableObj, Il2CppClass* nulla
 
 inline Il2CppString* GetKlassFullName(const Il2CppType* type)
 {
+#if HYBRIDCLR_UNITY_VERSION >= 70000000 && MONO_NET_BCL
+    return il2cpp::vm::String::New(il2cpp::vm::Type::GetName(type, IL2CPP_TYPE_NAME_FORMAT_REFLECTION).c_str());
+#else
     Il2CppReflectionType* refType = il2cpp::icalls::mscorlib::System::Type::internal_from_handle((intptr_t)type);
     return il2cpp::icalls::mscorlib::System::RuntimeType::getFullName((Il2CppReflectionRuntimeType*)refType, false, false);
+#endif
 }
 
 inline std::string GetKlassFullName2(const Il2CppType* type)
@@ -240,6 +258,16 @@ inline Il2CppException* GetTypeLoadException(const char* message)
     return il2cpp::vm::Exception::GetTypeLoadException(message, nullptr);
 #else
     return il2cpp::vm::Exception::GetTypeLoadException(message);
+#endif
+}
+
+inline const char* GetFieldData(FieldInfo* field)
+{
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    size_t dataSize = 0;
+    return il2cpp::vm::Field::GetData(field, &dataSize);
+#else
+    return il2cpp::vm::Field::GetData(field);
 #endif
 }
 

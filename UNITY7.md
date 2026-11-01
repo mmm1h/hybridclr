@@ -1,20 +1,13 @@
 # Unity 7 原生移植
 
-状态：原生适配未完成，不能用于发布。
+本维护分支以官方 `v6000.3.x-9.0.1` 为基线，只针对 Unity `7000.0.0a12`，修订 `8751f7c83ed7`。Unity 7 使用新的 .NET BCL、压缩元数据和运行时 ABI；配套 [il2cpp_plus](https://github.com/mmm1h/il2cpp_plus/tree/codex/unity7-support) 在本机原版源码上应用补丁，不复用 Unity 6 运行库。
 
-基线为官方 `v6000.3.x-9.0.1`，与工具包 `v9.0.3` 的版本清单一致。实验目标仅为 Unity `7000.0.0a12`，修订 `8751f7c83ed7`。配套的 [il2cpp_plus 维护分支](https://github.com/mmm1h/il2cpp_plus/tree/codex/unity7-support) 从本机安装的 Unity 7 生成探测用源码树。
+移植覆盖压缩签名和 token 重建、解释器元数据分发、泛型上下文、接口分发、动态 GC 根、反射和程序集字节流加载。新 BCL 的浮点转换与 CLR 一致；委托 `BeginInvoke` 和 `EndInvoke` 抛出 `PlatformNotSupportedException`。程序集加载支持非回收上下文，回收上下文明确拒绝；不提供程序集卸载或上下文隔离。
 
-Unity 7 将 `Il2CppGenericClass.context` 改为 `class_inst`。本分支提供值类型上下文适配，保持调用期间的上下文有效，并替换解释器、字段布局、元数据和虚方法处理中的直接字段访问。反射名称使用运行时的 `Type::GetName`，类型加载异常调用适配新的双参数接口。
+Win64 独立 IL2CPP 测试已通过两版外部热更 DLL，主程序保持相同哈希。覆盖反射调用、继承接口、数组 RVA、泛型、委托与 GC、原子操作、异常堆栈、模块初始化、加载上下文、特性、返回值特性和程序集枚举。浮点转整数结果与 .NET 10 对照一致，元数据解码检查覆盖不同索引宽度。测试使用真实生成的桥接代码，热更 DLL 不参与 AOT 转换。
 
-默认编译明确拒绝 Unity 7。源码探测必须显式定义 `HYBRIDCLR_UNITY7_EXPERIMENTAL`；该开关只允许检查未完成的代码，不表示运行时可用。Unity 7 的方法签名、成员 token 和接口分发表已经改变，`GlobalMetadata` 分发、解释器元数据表示、AOT 补充元数据以及加载入口仍需移植。
+Unity Editor 的安装与 Player 构建集成仍在适配；Android 和 iOS 尚无构建与设备执行证据。默认编译保留 Unity 7 防护，独立验证需要显式 `HYBRIDCLR_UNITY7_EXPERIMENTAL`，不能用于生产发布。
 
-泛型上下文可执行测试、公共兼容接口的对象编译和运行时异常源码的对象编译已通过 Unity 7 的真实头文件检查。同一泛型与公共接口检查也通过官方 Unity 6.3 基线头文件回归。完整原生源码诊断仍失败，不能链接或运行热更新；这些检查不覆盖 Player、安卓或 iOS。
+在 Visual Studio x64 开发者环境中，先用配套的 `unity7/prepare_probe.py` 生成独立源码目录。`--with-toolchain` 同时复制当前编辑器的 IL2CPP 工具。`tests/unity7/verify.py --help` 提供对象编译、元数据解码和运行时源码清单检查；输出目录必须不存在，失败返回非零并保留完整日志。
 
-在 Visual Studio x64 开发者 PowerShell 中，设置以下环境变量后执行。`UNITY_IL2CPP_DIR` 指向安装目录的 `Editor/Data/il2cpp`，另外两个变量必须指向尚不存在的独立输出目录。
-
-```powershell
-python ../il2cpp_plus/unity7/prepare_probe.py --unity-il2cpp "$env:UNITY_IL2CPP_DIR" --hybridclr . --output "$env:UNITY7_PROBE_DIR"
-python tests/unity7/verify.py --prepared-root "$env:UNITY7_PROBE_DIR" --unity-il2cpp "$env:UNITY_IL2CPP_DIR" --output "$env:UNITY7_LOG_DIR" --diagnose
-```
-
-验证器保留编译日志和 `report.json`，任一检查失败即返回非零。`--diagnose` 额外检查原生翻译单元；项目生成的 `MethodBridge.inc` 不会用占位代码替代，因此对应翻译单元会明确列为未覆盖。工具不安装运行时，不修改 Unity 安装目录或业务项目。
+运行 `tests/unity7/run_aot.py --help` 可查看独立 IL2CPP 验证参数。需要官方同版本 Windows IL2CPP 模块、准备好的完整 SDK，以及工具包 `Tests~/Unity7/build_bridge_host.py` 编译的桥接生成器。工具只写独立测试目录和明确指定的 SDK，不修改 Unity 安装或业务项目。机器有存储或构建调度规则时，应通过规定的构建包装器运行。

@@ -15,3 +15,8 @@ Il2CppGenericContext ProbeGenericContext(const Il2CppGenericClass* genericClass)
 {
     return hybridclr::GetGenericClassContext(genericClass);
 }
+
+const char* ProbeFieldData(FieldInfo* field)
+{
+    return hybridclr::GetFieldData(field);
+}

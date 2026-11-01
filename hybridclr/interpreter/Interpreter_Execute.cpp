@@ -32,8 +32,14 @@
 #include "vm/Thread.h"
 #include "vm/Runtime.h"
 #include "vm/Reflection.h"
+#include "os/Atomic.h"
 #include "metadata/GenericMetadata.h"
+#include "../Il2CppFloatingPointCompat.h"
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+#include "icalls/mscorlib/System.Threading/Interlocked.h"
+#else
 #include "vm-utils/icalls/mscorlib/System.Threading/Interlocked.h"
+#endif
 
 #include "../metadata/MetadataModule.h"
 
@@ -1308,32 +1314,36 @@ LabelGet:
 
 inline int32_t HiInterlockedCompareExchange(int32_t* location, int32_t newValue, int32_t oldValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::CompareExchange(location, newValue, oldValue);
+    return il2cpp::os::Atomic::CompareExchange(location, newValue, oldValue);
 }
 
 inline int64_t HiInterlockedCompareExchange(int64_t* location, int64_t newValue, int64_t oldValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::CompareExchange64(location, newValue, oldValue);
+    return il2cpp::os::Atomic::CompareExchange64(location, newValue, oldValue);
 }
 
 inline void* HiInterlockedCompareExchange(void** location, void* newValue, void* oldValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::CompareExchange_T(location, newValue, oldValue);
+    void* result = il2cpp::os::Atomic::CompareExchangePointer(location, newValue, oldValue);
+    il2cpp::gc::GarbageCollector::SetWriteBarrier(location);
+    return result;
 }
 
 inline int32_t HiInterlockedExchange(int32_t* location, int32_t newValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::Exchange(location, newValue);
+    return il2cpp::os::Atomic::Exchange(location, newValue);
 }
 
 inline int64_t HiInterlockedExchange(int64_t* location, int64_t newValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::Exchange64(location, newValue);
+    return il2cpp::os::Atomic::Exchange64(location, newValue);
 }
 
 inline void* HiInterlockedExchange(void** location, void* newValue)
 {
-    return il2cpp::icalls::mscorlib::System::Threading::Interlocked::ExchangePointer(location, newValue);
+    void* result = il2cpp::os::Atomic::ExchangePointer(location, newValue);
+    il2cpp::gc::GarbageCollector::SetWriteBarrier(location);
+    return result;
 }
 
 #define MEMORY_BARRIER() il2cpp::os::Atomic::FullMemoryBarrier()
@@ -1517,6 +1527,9 @@ inline void InvokeSingleDelegate(uint16_t invokeParamCount, const MethodInfo* me
 
 inline Il2CppObject* InvokeDelegateBeginInvoke(const MethodInfo* method, uint16_t* argIdxs, StackObject* localVarBase)
 {
+#if MONO_NET_BCL
+    il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetPlatformNotSupportedException("Delegate.BeginInvoke is not supported by the .NET BCL"));
+#else
     int32_t paramCount = method->parameters_count;
     RuntimeDelegate* del = (RuntimeDelegate*)localVarBase[argIdxs[0]].obj;
     CHECK_NOT_NULL_THROW(del);
@@ -1544,18 +1557,27 @@ inline Il2CppObject* InvokeDelegateBeginInvoke(const MethodInfo* method, uint16_
         }
     }
     return (RuntimeObject*)il2cpp_codegen_delegate_begin_invoke((RuntimeDelegate*)del, (void**)newArgs, callBack, ctx);
+#endif
 }
 
 inline void InvokeDelegateEndInvokeVoid(MethodInfo* method, Il2CppAsyncResult* asyncResult)
 {
+#if MONO_NET_BCL
+    il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetPlatformNotSupportedException("Delegate.EndInvoke is not supported by the .NET BCL"));
+#else
     il2cpp_codegen_delegate_end_invoke(asyncResult, 0);
+#endif
 }
 
 inline void InvokeDelegateEndInvokeRet(MethodInfo* method, Il2CppAsyncResult* asyncResult, void* ret)
 {
+#if MONO_NET_BCL
+    il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetPlatformNotSupportedException("Delegate.EndInvoke is not supported by the .NET BCL"));
+#else
     Il2CppObject* result = il2cpp_codegen_delegate_end_invoke(asyncResult, 0);
     Il2CppClass* retKlass = il2cpp::vm::Class::FromIl2CppType(method->return_type);
     HiUnboxAny2StackObject(result, retKlass, ret);
+#endif
 }
 
 #pragma endregion

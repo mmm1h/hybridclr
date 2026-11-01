@@ -4823,7 +4823,7 @@ void TransformContext::TransformBodyImpl(int32_t depth, int32_t localVarOffset)
                         ldfldFromFieldData = true;
                         CreateAddIR(ir, LdsfldaFromFieldDataVarVar);
                         ir->dst = dstIdx;
-                        ir->src = GetOrAddResolveDataIndex(il2cpp::vm::Field::GetData(fieldInfo));
+                        ir->src = GetOrAddResolveDataIndex(hybridclr::GetFieldData(fieldInfo));
                     }
                 }
                 if (!ldfldFromFieldData)

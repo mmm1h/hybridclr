@@ -34,7 +34,12 @@ class Assembly
 {
   public:
     static void InitializePlaceHolderAssemblies();
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    static Il2CppAssembly* LoadFromBytes(const void* assemblyData, uint64_t length, const void* rawSymbolStoreBytes, uint64_t rawSymbolStoreLength,
+                                       Il2CppAssemblyLoadContext* loadContext = nullptr);
+#else
     static Il2CppAssembly* LoadFromBytes(const void* assemblyData, uint64_t length, const void* rawSymbolStoreBytes, uint64_t rawSymbolStoreLength);
+#endif
     static LoadImageErrorCode LoadMetadataForAOTAssembly(const void* dllBytes, uint32_t dllSize, HomologousImageMode mode);
 
   private:

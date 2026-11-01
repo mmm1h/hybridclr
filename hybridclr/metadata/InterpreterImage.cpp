@@ -115,6 +115,9 @@ void InterpreterImage::InitBasic(Il2CppImage* image)
 void InterpreterImage::BuildIl2CppAssembly(Il2CppAssembly* ass)
 {
     ass->token = EncodeToken(TableType::ASSEMBLY, 1);
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    ass->moduleToken = EncodeToken(TableType::MODULE, 1);
+#endif
     ass->referencedAssemblyStart = EncodeWithIndex(1);
     ass->referencedAssemblyCount = _rawImage->GetTableRowNum(TableType::ASSEMBLYREF);
 
@@ -137,8 +140,11 @@ void InterpreterImage::BuildIl2CppImage(Il2CppImage* image2)
     image2->exportedTypeCount = _rawImage->GetTableRowNum(TableType::EXPORTEDTYPE);
     image2->customAttributeCount = _rawImage->GetTableRowNum(TableType::CUSTOMATTRIBUTE);
 
-    Il2CppImageGlobalMetadata* metadataImage = (Il2CppImageGlobalMetadata*)HYBRIDCLR_METADATA_MALLOC(sizeof(Il2CppImageGlobalMetadata));
+    Il2CppImageGlobalMetadata* metadataImage = (Il2CppImageGlobalMetadata*)HYBRIDCLR_METADATA_CALLOC(1, sizeof(Il2CppImageGlobalMetadata));
     metadataImage->typeStart = EncodeWithIndex(0);
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    metadataImage->fieldStart = metadataImage->propertyStart = metadataImage->eventStart = metadataImage->methodStart = EncodeWithIndex(0);
+#endif
     metadataImage->customAttributeStart = EncodeWithIndex(0);
     metadataImage->entryPointIndex = EncodeWithIndexExcept0(_rawImage->GetEntryPointToken());
     metadataImage->exportedTypeStart = EncodeWithIndex(0);

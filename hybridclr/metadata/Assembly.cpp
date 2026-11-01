@@ -121,9 +121,17 @@ static void RunModuleInitializer(Il2CppImage* image)
     il2cpp::vm::Runtime::ClassInit(moduleKlass);
 }
 
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+Il2CppAssembly* Assembly::LoadFromBytes(const void* assemblyData, uint64_t length, const void* rawSymbolStoreBytes, uint64_t rawSymbolStoreLength,
+                                     Il2CppAssemblyLoadContext* loadContext)
+#else
 Il2CppAssembly* Assembly::LoadFromBytes(const void* assemblyData, uint64_t length, const void* rawSymbolStoreBytes, uint64_t rawSymbolStoreLength)
+#endif
 {
     Il2CppAssembly* ass = Create((const byte*)assemblyData, length, (const byte*)rawSymbolStoreBytes, rawSymbolStoreLength);
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    ass->loadContext = loadContext;
+#endif
     RunModuleInitializer(ass->image);
     return ass;
 }
