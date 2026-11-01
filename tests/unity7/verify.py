@@ -28,6 +28,8 @@ def main():
                         help="JSON manifest of patched runtime files to compile")
     parser.add_argument("--compile-objects", action="store_true",
                         help="Emit objects for diagnosed sources instead of syntax-only checks")
+    parser.add_argument("--legacy-bcl", action="store_true",
+                        help="Probe the legacy Mono BCL profile instead of the modern Unity 7 BCL")
     args = parser.parse_args()
     runtime_manifest = {}
     if args.runtime_manifest:
@@ -50,9 +52,10 @@ def main():
         parser.error("output must be outside the input source tree")
     output.mkdir(parents=True)
     external = args.unity_il2cpp.resolve() / "external"
+    mono_net_bcl = 1 if version >= 70000000 and not args.legacy_bcl else 0
     flags = ["/nologo", "/EHsc", "/std:c++17", "/Zc:__cplusplus", "/utf-8", "/bigobj",
              "/MT", "/DWIN32", "/D_WINDOWS", "/DUNICODE", "/D_UNICODE",
-             "/DRUNTIME_IL2CPP=1", f"/DMONO_NET_BCL={1 if version >= 70000000 else 0}", "/DIL2CPP_DEBUG=0",
+             "/DRUNTIME_IL2CPP=1", f"/DMONO_NET_BCL={mono_net_bcl}", "/DIL2CPP_DEBUG=0",
              "/DBASELIB_INLINE_NAMESPACE=il2cpp_baselib", f"/I{runtime}",
              f"/I{external / 'baselib/Include'}",
              f"/I{external / 'baselib/Platforms/Windows/Include'}",
@@ -64,7 +67,7 @@ def main():
     tests = Path(__file__).resolve().parent
     report = {"scope": "Win64 C++ source probes; no IL2CPP Player or mobile execution",
               "unity_version_macro": version,
-              "mono_net_bcl": 1 if version >= 70000000 else 0,
+              "mono_net_bcl": mono_net_bcl,
               "checks": [], "translation_units": [], "excluded": []}
 
     def compile_to_log(name, tail, opt_in=True):
@@ -97,9 +100,12 @@ def main():
         sources += [runtime / path for path in args.runtime_source]
         for source in sources:
             relative = source.relative_to(native).as_posix() if source.is_relative_to(native) else source.relative_to(runtime).as_posix()
-            if version >= 70000000 and relative in runtime_manifest.get("legacy_only", []):
+            if mono_net_bcl and relative in runtime_manifest.get("legacy_only", []):
                 report["excluded"].append({"source": relative,
                     "reason": "Legacy Mono BCL source; Unity's System.Private.CoreLib profile uses icalls_monoaot instead"})
+                continue
+            if not mono_net_bcl and relative.startswith("icalls_monoaot/"):
+                report["excluded"].append({"source": relative, "reason": "Modern BCL source is not compiled in the legacy profile"})
                 continue
             if relative == "metadata/MethodBridgeSub.cpp" and not (native / "generated/MethodBridge.inc").is_file():
                 report["excluded"].append({"source": relative,

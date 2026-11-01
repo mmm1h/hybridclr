@@ -1,7 +1,9 @@
 // Copyright (c) 2026 mmm1h. Licensed under the MIT license in the repository root.
 using System;
 using System.Runtime.CompilerServices;
+#if !LEGACY_BCL
 using System.Runtime.Loader;
+#endif
 using System.Threading;
 using System.Collections.Generic;
 
@@ -27,7 +29,11 @@ namespace Unity7HotUpdateFixture
         [ModuleInitializer]
         public static void Initialize()
         {
+#if LEGACY_BCL
+            ContextReady = true;
+#else
             ContextReady = AssemblyLoadContext.GetLoadContext(typeof(Calculator).Assembly) != null;
+#endif
         }
 
         public int Sum(int a, int b) { return a + b; }
