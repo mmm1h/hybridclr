@@ -44,7 +44,9 @@ internal static class AotHost
             }
             Check((bool)type.GetField("ContextReady").GetValue(null), "load-context-before-module-initializer");
             Check(AssemblyLoadContext.GetLoadContext(assembly) != null, "assembly-load-context-identity");
-            Check(type.GetCustomAttributes(false).Length == 1, "custom-attribute");
+            object[] attributes = type.GetCustomAttributes(false);
+            Check(attributes.Length == 1 && (int)attributes[0].GetType().GetProperty("Number").GetValue(attributes[0]) == 23, "custom-attribute");
+            Check(type.GetProperty("MarkedProperty").GetCustomAttributes(false).Length == 1, "property-attribute");
             Check(type.GetMethod("MarkedReturn").ReturnParameter.GetCustomAttributes(false).Length == 1, "return-parameter-attribute");
             Check(assembly.ManifestModule.MetadataToken == 1, "manifest-module-token");
             Check(Array.Exists(AppDomain.CurrentDomain.GetAssemblies(), candidate => candidate == assembly), "loaded-assembly-enumeration");

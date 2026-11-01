@@ -1126,7 +1126,7 @@ void InterpreterImage::GetPropertyDeclaringTypeIndexAndPropertyIndexByName(const
     }
     IL2CPP_ASSERT(fieldIndex != -1);
 #else
-    fieldIndex = (int32_t)(propertyInfo - klass->properties);
+    fieldIndex = (int32_t)(propertyInfo - (const PropertyInfo*)klass->properties);
 #endif
 }
 

@@ -3,20 +3,22 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace Unity7HotUpdateFixture
 {
     public interface ISum { int Sum(int a, int b); }
     public interface ICalculator : ISum { }
 
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.ReturnValue)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.ReturnValue | AttributeTargets.Property)]
     public sealed class MarkerAttribute : Attribute
     {
         public string Name { get; }
+        public int Number { get; set; }
         public MarkerAttribute(string name) { Name = name; }
     }
 
-    [Marker("loaded-from-bytes")]
+    [Marker("loaded-from-bytes", Number = 23)]
     public sealed class Calculator : ICalculator
     {
         private static readonly int[] Values = { 3, 4, 5 };
@@ -66,6 +68,20 @@ namespace Unity7HotUpdateFixture
         }
 
         public static void ThrowFromHotCode() { throw new InvalidOperationException("hot-propagated"); }
+
+        public struct HotValue { public int Number; }
+        public static int AotGenericCollection()
+        {
+            var values = new List<HotValue>();
+            values.Add(new HotValue { Number = 17 });
+            values.Add(new HotValue { Number = 25 });
+            int sum = 0;
+            foreach (HotValue value in values) sum += value.Number;
+            return sum;
+        }
+
+        [Marker("property-token")]
+        public int MarkedProperty { get; set; }
 
         public static string ExceptionMessage()
         {
