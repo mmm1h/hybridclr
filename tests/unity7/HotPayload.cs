@@ -41,6 +41,9 @@ namespace Unity7HotUpdateFixture
         public static int ArrayData() { return Values[0] + Values[1] + Values[2]; }
         public static T Echo<T>(T value) { return value; }
         public static Func<int, int> MakeAdder(int delta) { return value => value + delta; }
+        public static double MixedArguments(float first, double second, long third) { return first + second + third; }
+        public static double CallAotDelegate(Func<float, double, long, double> callback) { return callback(1.5f, 2.25, 7); }
+        public static decimal DecimalArithmetic(decimal first, decimal second) { return first * second + 0.25m; }
 
         public static int PayloadVersion()
         {

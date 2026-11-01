@@ -6,7 +6,7 @@
 
 Win64 独立 IL2CPP 测试已通过两版外部热更 DLL，主程序保持相同哈希。覆盖反射调用、继承接口、数组 RVA、泛型、委托与 GC、原子操作、异常堆栈、模块初始化、加载上下文、特性、返回值特性和程序集枚举。浮点转整数结果与 .NET 10 对照一致，元数据解码检查覆盖不同索引宽度。测试使用真实生成的桥接代码，热更 DLL 不参与 AOT 转换。
 
-Windows Editor 的安装、桥接生成和 Win64 IL2CPP Player 已通过验证，包含 AOT 补充元数据和热更结构体的泛型集合调用。默认 `.NET Standard 2.1` 和 `.NET` API 配置均通过 Win64 Player 验证，运行时都使用 .NET 10 BCL。旧 Mono BCL 只通过源码检查；Android 和 iOS 没有构建及设备执行证据。源码默认保留 Unity 7 防护，工具包为精确匹配的安装生成 `HYBRIDCLR_UNITY7_EXPERIMENTAL`；本分支仍是 Alpha 版本的实验支持，不能用于生产发布。
+Windows 和 macOS 编辑器的安装、桥接生成，以及 Win64 Player、Android ARM64 真机和 iOS ARM64 模拟器已通过验证。三个 Player 目标均在相同原生二进制下执行两版外部 DLL，每版覆盖 AOT 补充元数据、热更结构体泛型集合、混合浮点与整数参数、结构体返回值和异常传播。Win64 的默认 `.NET Standard 2.1` 与 `.NET` API 配置、iOS 模拟器的默认配置使用 .NET 10 BCL；默认 Android 使用 Mono BCL。源码保留精确修订防护，配套工具包为匹配的安装生成 `HYBRIDCLR_UNITY7_EXPERIMENTAL`。升级编辑器时需要更新源码锁并重新验证。
 
 在 Visual Studio x64 开发者环境中，先用配套的 `unity7/prepare_probe.py` 生成独立源码目录。`--with-toolchain` 同时复制当前编辑器的 IL2CPP 工具。`tests/unity7/verify.py --help` 提供对象编译、元数据解码和运行时源码清单检查；输出目录必须不存在，失败返回非零并保留完整日志。
 
