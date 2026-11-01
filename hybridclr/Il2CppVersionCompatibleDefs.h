@@ -66,6 +66,13 @@
 
 #endif
 
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+#if HYBRIDCLR_UNITY_VERSION != 70000000 || !defined(HYBRIDCLR_UNITY7_EXPERIMENTAL)
+#error "Unity 7 native support is incomplete. Only the 7000.0.0a12 source-port probes may opt in with HYBRIDCLR_UNITY7_EXPERIMENTAL."
+#endif
+#define HYBRIDCLR_UNITY_7000 1
+#endif
+
 #if HYBRIDCLR_UNITY_VERSION >= 20220000
 #define HYBRIDCLR_UNITY_2022_OR_NEWER 1
 #endif

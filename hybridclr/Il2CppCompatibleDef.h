@@ -23,10 +23,12 @@
 #include "il2cpp-config.h"
 #include "codegen/il2cpp-codegen-metadata.h"
 #include "il2cpp-class-internals.h"
+#include "Il2CppGenericClassCompat.h"
 
 #include "vm/Array.h"
 #include "vm/Type.h"
 #include "vm/Runtime.h"
+#include "vm/Exception.h"
 #include "vm/GlobalMetadataFileInternals.h"
 #include "vm/MetadataAlloc.h"
 #include "icalls/mscorlib/System/Type.h"
@@ -229,8 +231,16 @@ inline Il2CppString* GetKlassFullName(const Il2CppType* type)
 
 inline std::string GetKlassFullName2(const Il2CppType* type)
 {
-    Il2CppReflectionType* refType = il2cpp::icalls::mscorlib::System::Type::internal_from_handle((intptr_t)type);
-    return il2cpp::icalls::mscorlib::System::RuntimeType::getFullName2((Il2CppReflectionRuntimeType*)refType, false, false);
+    return il2cpp::vm::Type::GetName(type, IL2CPP_TYPE_NAME_FORMAT_REFLECTION);
+}
+
+inline Il2CppException* GetTypeLoadException(const char* message)
+{
+#if HYBRIDCLR_UNITY_VERSION >= 70000000
+    return il2cpp::vm::Exception::GetTypeLoadException(message, nullptr);
+#else
+    return il2cpp::vm::Exception::GetTypeLoadException(message);
+#endif
 }
 
 } // namespace hybridclr

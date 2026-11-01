@@ -861,7 +861,7 @@ void InterpreterImage::ConvertSystemType(CustomAttributeDataWriter& writer, Blob
     {
         std::string stdTypeName = il2cpp::utils::StringUtils::Utf16ToUtf8(fullName->chars);
         TEMP_FORMAT(errMsg, "CustomAttribute fixed arg type:System.Type fullName:'%s' not find", stdTypeName.c_str());
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException(errMsg));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException(errMsg));
     }
     WriteTypeIndex(writer, type->type);
 }
@@ -2186,7 +2186,7 @@ Il2CppReflectionType* InterpreterImage::ReadSystemType(BlobReader& reader)
     {
         std::string stdTypeName = il2cpp::utils::StringUtils::Utf16ToUtf8(fullName->chars);
         TEMP_FORMAT(errMsg, "CustomAttribute fixed arg type:System.Type fullName:'%s' not find", stdTypeName.c_str());
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException(errMsg));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException(errMsg));
     }
     return type;
 }

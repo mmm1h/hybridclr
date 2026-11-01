@@ -317,7 +317,8 @@ void ClassFieldLayoutCalculator::CalcClassNotStaticFields(const Il2CppType* type
         return;
     }
 
-    const Il2CppGenericContext* gc = type->type == IL2CPP_TYPE_GENERICINST ? &type->data.generic_class->context : nullptr;
+    const Il2CppGenericContext classContext = type->type == IL2CPP_TYPE_GENERICINST ? GetGenericClassContext(type->data.generic_class) : Il2CppGenericContext{};
+    const Il2CppGenericContext* gc = type->type == IL2CPP_TYPE_GENERICINST ? &classContext : nullptr;
     for (uint16_t i = 0; i < typeDef.field_count; i++)
     {
         FieldIndex fieldIndex = typeDef.fieldStart + i;

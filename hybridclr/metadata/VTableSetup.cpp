@@ -269,7 +269,7 @@ static void RaiseParentOverridedMethodNotFindException(const Il2CppType* type, c
 {
     if (!type)
     {
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException("type not exists"));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException("type not exists"));
     }
 
     const Il2CppTypeDefinition typeDefinition = GetUnderlyingTypeDefinition(type);
@@ -660,10 +660,11 @@ void VTableSetUp::ApplyTypeExplicitImpls(const Il2CppType* type, const VTableSet
         else
         {
             const Il2CppGenericClass* genericClass = type->data.generic_class;
+            const Il2CppGenericContext genericContext = GetGenericClassContext(genericClass);
             for (const MethodImpl& mi : explicitImpls)
             {
                 const Il2CppType* containerType =
-                    il2cpp::metadata::GenericMetadata::InflateIfNeeded(mi.declaration.containerType, &genericClass->context, true);
+                    il2cpp::metadata::GenericMetadata::InflateIfNeeded(mi.declaration.containerType, &genericContext, true);
                 const Il2CppType* implType = TryInflateIfNeed(type, type->data.generic_class->type, mi.body.containerType);
                 ApplyExplicitOverride(implInterfaceOffsetIdxs, explicitImplToken2Slots, containerType, mi.declaration.methodHandle, implType,
                                       mi.body.methodHandle);

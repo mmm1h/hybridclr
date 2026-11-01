@@ -921,7 +921,7 @@ Il2CppClass* Image::GetClassFromToken(Token2RuntimeHandleMap& tokenCache, uint32
     if (!klass)
     {
         TEMP_FORMAT(errMsg, "InterpreterImage::GetClassFromToken token:%u class not exists", token);
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException(errMsg));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException(errMsg));
     }
     tokenCache.insert({key, (void*)klass});
     return klass;
@@ -1176,7 +1176,7 @@ const MethodInfo* Image::GetMethodInfo(const Il2CppType* containerType, const Il
     if (instantiation)
     {
         const Il2CppGenericInst* finalClassIns =
-            finalContainerType->type == IL2CPP_TYPE_GENERICINST ? finalContainerType->data.generic_class->context.class_inst : nullptr;
+            finalContainerType->type == IL2CPP_TYPE_GENERICINST ? GetGenericClassInstance(finalContainerType->data.generic_class) : nullptr;
         const Il2CppGenericInst* finalMethodIns = instantiation;
         Il2CppGenericContext finalGenericContext = {finalClassIns, finalMethodIns};
         method = method->is_inflated ? method->genericMethod->methodDefinition : method;

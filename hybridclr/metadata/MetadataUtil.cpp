@@ -230,7 +230,8 @@ const Il2CppType* TryInflateIfNeed(const Il2CppType* containerType, const Il2Cpp
     if (IsGenericIns(containerType) /* && IsGenericIns(selfType)*/)
     {
         // TOTO memory leak
-        return il2cpp::metadata::GenericMetadata::InflateIfNeeded(selfType, &containerType->data.generic_class->context, true);
+        const Il2CppGenericContext context = GetGenericClassContext(containerType->data.generic_class);
+        return il2cpp::metadata::GenericMetadata::InflateIfNeeded(selfType, &context, true);
     }
     else
     {
@@ -269,8 +270,8 @@ bool IsSameOverrideType(const Il2CppType* t1, const Il2CppType* t2)
     }
     case IL2CPP_TYPE_GENERICINST:
     {
-        const Il2CppGenericInst* i1 = t1->data.generic_class->context.class_inst;
-        const Il2CppGenericInst* i2 = t2->data.generic_class->context.class_inst;
+        const Il2CppGenericInst* i1 = GetGenericClassInstance(t1->data.generic_class);
+        const Il2CppGenericInst* i2 = GetGenericClassInstance(t2->data.generic_class);
 
         // this happens when maximum generic recursion is hit
         if (i1 == NULL || i2 == NULL)
@@ -413,8 +414,8 @@ bool IsMatchSigType(const Il2CppType* dstType, const Il2CppType* sigType, const 
     }
     case IL2CPP_TYPE_GENERICINST:
     {
-        const Il2CppGenericInst* i1 = dstType->data.generic_class->context.class_inst;
-        const Il2CppGenericInst* i2 = sigType->data.generic_class->context.class_inst;
+        const Il2CppGenericInst* i1 = GetGenericClassInstance(dstType->data.generic_class);
+        const Il2CppGenericInst* i2 = GetGenericClassInstance(sigType->data.generic_class);
 
         // this happens when maximum generic recursion is hit
         if (i1 == NULL || i2 == NULL)
@@ -504,8 +505,8 @@ bool IsMatchSigType(const Il2CppType* dstType, const Il2CppType* sigType, const 
     }
     case IL2CPP_TYPE_GENERICINST:
     {
-        const Il2CppGenericInst* i1 = dstType->data.generic_class->context.class_inst;
-        const Il2CppGenericInst* i2 = sigType->data.generic_class->context.class_inst;
+        const Il2CppGenericInst* i1 = GetGenericClassInstance(dstType->data.generic_class);
+        const Il2CppGenericInst* i2 = GetGenericClassInstance(sigType->data.generic_class);
 
         // this happens when maximum generic recursion is hit
         if (i1 == NULL || i2 == NULL)
@@ -809,7 +810,7 @@ bool HasNotInstantiatedGenericType(const Il2CppType* type)
     case IL2CPP_TYPE_GENERICINST:
     {
         Il2CppGenericClass* genericClass = type->data.generic_class;
-        return HasNotInstantiatedGenericType(genericClass->context.class_inst);
+        return HasNotInstantiatedGenericType(GetGenericClassInstance(genericClass));
     }
     case IL2CPP_TYPE_VAR:
     case IL2CPP_TYPE_MVAR:

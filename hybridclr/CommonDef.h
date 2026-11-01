@@ -109,7 +109,7 @@ inline void RaiseMethodNotFindException(const Il2CppType* type, const char* meth
 {
     if (!type)
     {
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException("type not exists"));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException("type not exists"));
     }
 
     std::string fullName = GetKlassCStringFullName(type);
@@ -169,7 +169,7 @@ inline void RaiseMissingFieldException(const Il2CppType* type, const char* field
 {
     if (!type)
     {
-        il2cpp::vm::Exception::Raise(il2cpp::vm::Exception::GetTypeLoadException("type not exists"));
+        il2cpp::vm::Exception::Raise(hybridclr::GetTypeLoadException("type not exists"));
     }
     std::string stdFullName = GetKlassCStringFullName(type);
     TEMP_FORMAT(errMsg, "field %s::%s not exists", stdFullName.c_str(), fieldName);
